@@ -1,56 +1,19 @@
 import { Router } from "express";
-import Taks from "../models/Taks";
+import {renderTasks, createTask, renderTaskEdit, taskEdit, taskDelate, taskDone} from "../controllers/tasks.controller";
 
 const router = Router();
 
-router.get("/", async (req, res) => {
-  const tasks = await Taks.find().lean();
-  res.render('index', { tasks: tasks });
-});
+router.get("/", renderTasks);
 
-router.post('/tasks/add', async (req, res) => {
-  try {
-    const tasks = Taks(req.body)
+router.post('/tasks/add', createTask);
 
-    await tasks.save()
-    res.redirect('/')
+router.get("/task/:id/toogleDone", taskDone)
 
-  } catch (err) {
-    console.log(err);
-  }
-})
+router.get("/task/:id/edit", renderTaskEdit);
 
-router.get("/about", (req, res) => {
-  res.render("about");
-});
+router.post("/task/:id/edit", taskEdit);
 
-router.get("/edit/:id", async (req, res) => {
-  try {
-    const task = await Taks.findById(req.params.id).lean();
-    res.render("edit", { task });
-  } catch (err) {
-    console.log(err.message);
-  }
-});
+router.get("/task/:id/delete", taskDelate)
 
-router.post("/edit/:id", async (req, res) => {
-  const { id } = req.params;
-  await Taks.findByIdAndUpdate(id, req.body)
-  res.redirect("/")
-});
-
-router.get("/delete/:id", async (req, res) => {
-  const {id} = req.params;
-  await Taks.findByIdAndDelete(id)
-  res.redirect("/");
-})
-
-router.get("/toogleDone/:id", async (req, res) => {
-  const {id} = req.params;
-  const task = await Taks.findById(id)
-  task.done = !task.done;
-  await task.save();
-  res.redirect("/");
-})
 
 export default router
